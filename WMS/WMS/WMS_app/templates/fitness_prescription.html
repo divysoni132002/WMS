@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Assignment System</title>
+    <style>
+        header {
+        text-align: center;
+        margin-top: 20px;
+        }
+
+        h1 {
+        color: #1e88e5;
+        text-align: center;
+        text-decoration: solid;
+        margin-top: 20px;
+        font-weight: bold;
+        }
+
+        .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        }
+
+        .input-group label {
+        flex-basis: 180px;
+        margin-right: 15px;
+        color: #1565c0;
+        font-weight: bold;
+        }
+
+        .input-group input,
+        .input-group select {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #bbdefb;
+        border-radius: 5px;
+        font-size: 14px;
+        }
+
+        .submit-button {
+        margin-top: 25px;
+        padding: 12px 25px;
+        background-color: #1e88e5;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+        background-color: #1565c0;
+        }
+        .logo {
+        width: 250px; /* Adjust the width as needed */
+        height: 100px; /* Maintain the aspect ratio */
+        position: absolute;
+        top: 30px; /* Adjust the top position as needed */
+        left: 30px; /* Adjust the left position as needed */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% load static %}
+        <img src="{% static 'laiqa_logo.jpeg' %}" alt="Laiqa Logo" class="logo">
+        <h1>Exercise Assignment System</h1>
+    </header>
+    <div class="container">
+        <form action="{% url 'submit_fitness_plan' %}" method="POST">
+            {% csrf_token %}
+            
+            <div id="taskRows">
+                <div class="input-group">
+                    <label for="name_of_user-0">Name of user:</label>
+                    <input type="text" id="name_of_user-0" name="name_of_user-0" placeholder="Name of user" required>
+                </div>
+                <div class="input-group">
+                    <label for="user_id-0">User ID:</label>
+                    <input type="number" id="user_id-0" name="user_id-0" placeholder="User ID" required>
+                </div>
+                <div class="input-group">
+                    <label for="menstrual_phase-0">Select Menstrual Phase:</label>
+                    <select id="menstrual_phase-0" name="menstrual_phase-0" required>
+                        <option value="">Select Menstrual Phase</option>
+                        <option value="Menstrual">Menstrual</option>
+                        <option value="Follicular">Follicular</option>
+                        <option value="Ovulation">Ovulation</option>
+                        <option value="Luteal">Luteal</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="exercise-0">Select Exercise:</label>
+                    <select id="exercise-0" name="exercise-0" required>
+                        <option value="">Select Exercise</option>
+                        {% for exercise in exercises %}
+                        <option value="{{ exercise.id }}">{{ exercise.name_of_exercise }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="time-0">Number of seconds (if not count):</label>
+                    <input type="number" id="time-0" name="time-0" placeholder="Number of secs">
+                </div>
+                <div class="input-group">
+                    <label for="count-0">Number of times (if not seconds):</label>
+                    <input type="number" id="count-0" name="count-0" placeholder="Number of times to repeat">
+                </div>
+                <div class="input-group">
+                    <label for="start_date-0">Start Date:</label>
+                    <input type="date" id="start_date-0" name="start_date-0" min="{{ today }}" required>
+                </div>
+                <div class="input-group">
+                    <label for="end_date-0">End Date:</label>
+                    <input type="date" id="end_date-0" name="end_date-0" min="{{ today }}" required oninput="calculateTotalDays(this, 0)">
+                </div>
+                <div class="input-group">
+                    <label for="number_of_reps_of_exercise-0">Number of reps:</label>
+                    <input type="number" id="number_of_reps_of_exercise-0" name="number_of_reps_of_exercise-0" placeholder="Number of reps">
+                </div>
+                <div class="input-group">
+                    <label for="ex_gap-0">Exercise gap (seconds):</label>
+                    <input type="number" id="ex_gap-0" name="ex_gap-0" placeholder="Exercise gap (seconds)">
+                </div>
+                <div class="input-group">
+                    <label for="rep_gap-0">Rep gap (seconds):</label>
+                    <input type="number" id="rep_gap-0" name="rep_gap-0" placeholder="Rep gap (seconds)">
+                </div>
+                <div class="input-group">
+                    <label for="total_days-0">Total days:</label>
+                    <input type="number" id="total_days-0" name="total_days-0" placeholder="Total days" readonly>
+                </div>
+                <div class="input-group">
+                    <label for="total_duration-0">Total duration (min):</label>
+                    <input type="number" id="total_duration-0" name="total_duration-0" placeholder="Total duration (min)">
+                </div>
+                <div class="input-group">
+                    <label for="notes-0">Notes:</label>
+                    <input type="text" id="notes-0" name="notes-0" placeholder="Notes">
+                </div>
+            </div>
+            <button type="button" onclick="addTaskRow()">+</button>
+            <button type="button" onclick="removeTaskRow()">-</button>
+            <button class="submit-button" type="submit">Submit Plan</button>
+        </form>
+    </div>
+    <script>
+        let rowIndex = 1;
+        function addTaskRow() {
+            const taskRowsDiv = document.getElementById('taskRows');
+            const newTaskRow = document.createElement('div');
+            newTaskRow.className = 'task-row';
+            const today = new Date().toISOString().split('T')[0];
+            newTaskRow.innerHTML = `
+                <div class="input-group">
+                    <label for="menstrual_phase-${rowIndex}">Select Menstrual Phase:</label>
+                    <select id="menstrual_phase-${rowIndex}" name="menstrual_phase-${rowIndex}" required>
+                        <option value="">Select Menstrual Phase</option>
+                        <option value="Menstrual">Menstrual</option>
+                        <option value="Follicular">Follicular</option>
+                        <option value="Ovulation">Ovulation</option>
+                        <option value="Luteal">Luteal</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="exercise-${rowIndex}">Select Exercise:</label>
+                    <select id="exercise-${rowIndex}" name="exercise-${rowIndex}" required>
+                        <option value="">Select Exercise</option>
+                        {% for exercise in exercises %}
+                        <option value="{{ exercise.id }}">{{ exercise.name_of_exercise }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="time">Number of seconds(if not count):</label>
+                    <input type="number" id="time-0" name="time" placeholder="Number of secs">
+                </div>
+                <div class="input-group">
+                    <label for="count">Number of times(if not seconds):</label>
+                    <input type="number" id="count-0" name="time" placeholder="Number of secs">
+                </div>
+                <div class="input-group">
+                    <label for="start_date-${rowIndex}">Start Date:</label>
+                    <input type="date" id="start_date-${rowIndex}" name="start_date-${rowIndex}" min="${today}" required>
+                </div>
+                <div class="input-group">
+                    <label for="end_date-${rowIndex}">End Date:</label>
+                    <input type="date" id="end_date-${rowIndex}" name="end_date-${rowIndex}" min="${today}" required oninput="calculateTotalDays(this, ${rowIndex})">
+                </div>
+                <div class="input-group">
+                    <label for="number_of_reps_of_exercise-${rowIndex}">Number of reps:</label>
+                    <input type="number" id="number_of_reps_of_exercise-${rowIndex}" name="number_of_reps_of_exercise-${rowIndex}" placeholder="Number of reps">
+                </div>
+                <div class="input-group">
+                    <label for="ex_gap-${rowIndex}">Exercise gap (seconds):</label>
+                    <input type="number" id="ex_gap-${rowIndex}" name="ex_gap-${rowIndex}" placeholder="Exercise gap (seconds)">
+                </div>
+                <div class="input-group">
+                    <label for="rep_gap-${rowIndex}">Rep gap (seconds):</label>
+                    <input type="number" id="rep_gap-${rowIndex}" name="rep_gap-${rowIndex}" placeholder="Rep gap (seconds)">
+                </div>
+                <div class="input-group">
+                    <label for="total_days-${rowIndex}">Total days:</label>
+                    <input type="number" id="total_days-${rowIndex}" name="total_days-${rowIndex}" placeholder="Total days" readonly>
+                </div>
+                <div class="input-group">
+                    <label for="total_duration-${rowIndex}">Total duration (min):</label>
+                    <input type="number" id="total_duration-${rowIndex}" name="total_duration-${rowIndex}" placeholder="Total duration (min)">
+                </div>
+                <div class="input-group">
+                    <label for="notes-${rowIndex}">Notes:</label>
+                    <input type="text" id="notes-${rowIndex}" name="notes-${rowIndex}" placeholder="Notes">
+                </div>
+            `;
+            taskRowsDiv.appendChild(newTaskRow);
+            document.getElementById(`name_of_user-${rowIndex}`).value = document.getElementById('name_of_user-0').value;
+            document.getElementById(`user_id-${rowIndex}`).value = document.getElementById('user_id-0').value;
+            rowIndex++;
+        }
+
+        function removeTaskRow() {
+            const taskRowsDiv = document.getElementById('taskRows');
+            if (taskRowsDiv.children.length > 1) {
+                taskRowsDiv.removeChild(taskRowsDiv.lastElementChild);
+                rowIndex--;
+            }
+        }
+    </script>
+</body>
+</html>

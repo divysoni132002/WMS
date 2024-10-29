@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Work Monitoring System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7e7ea;
+            text-align: center;
+            color: #333;
+        }
+        header {
+            position: relative;
+            margin-top: 20px;
+        }
+        h1 {
+            color: #ff69b4;
+            margin-top: 20px;
+        }
+        .username {
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        form {
+            margin-top: 30px;
+        }
+        .task-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .task-row input[type="date"],
+        .task-row input[type="text"],
+        .task-row select {
+            padding: 10px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        .task-row input[type="time"] {
+            padding: 10px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+        .add-task {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        line-height: 1;
+        padding: 0;
+        border-radius: 4px;
+        background-color: #ff69b4;
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+        .button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #ff69b4;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-left: 10px;
+        }
+        }
+        .hours-select {
+        width: 70px;
+        height: 70px;
+        }
+        .logo {
+        width: 250px; /* Adjust the width as needed */
+        height: 100px; /* Maintain the aspect ratio */
+        position: absolute;
+        top: 30px; /* Adjust the top position as needed */
+        left: 30px; /* Adjust the left position as needed */
+        }
+        .button-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        }
+
+    </style>
+</head>
+    <header>
+        {% load static %}
+        <img src="{% static 'laiqa_logo_small.jpeg' %}" alt="Laiqa Logo" class="logo">
+    </header>
+    <h1>Vendor Work Monitoring System</h1>
+    <p class="username">Name of Expert: {{ username }}</p>
+    <form id="taskForm" method="post" action="{% url 'submit_task' %}">
+        {% csrf_token %}
+        <div id="taskRows">
+            <div class="task-row">
+                <div>
+                    <label>Date of Work</label>
+                    <input type="date" name="date-0" min="" max="" required>
+                </div>
+                <div>
+                    <label>Submission Time</label>
+                    <input type="time" name="time-0" readonly>
+                </div>
+                <div>
+                    <label>Task Details</label>
+                    <input type="text" name="task-0" placeholder="Task done" required>
+                </div>
+                <div>
+                    <label>Hours</label>
+                    <select name="hours-0" class="hours-select">
+                        {% for i in hours_list %}
+                            <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Communication Needed</label>
+                    <select name="communicative-changes-0">
+                        <option value="None">None</option>
+                        <option value="Endpoint name change">Endpoint name change</option>
+                        <option value="Request param change">Request param change</option>
+                        <option value="Logic change in API">Logic change in API</option>
+                        <option value="Response change from backend">Response change from backend</option>
+                        <option value="Payload change by frontend">Payload change by frontend</option>
+                        <option value="Table data change">Table data change</option>
+                        <option value="Table structure change">Table structure change</option>
+                        <option value="Format change in work">Format change in work</option>
+                        <option value="Operational change">Operational change</option>
+                        <option value="Look UI change">Look UI change</option>
+                        <option value="Other changes needing comms">Other changes needing comms</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Status</label>
+                    <select name="status-0">
+                        <option value="Finished">Finished</option>
+                        <option value="In progress">In progress</option>
+                        <option value="Stuck because of dependency">Stuck because of dependency</option>
+                        <option value="Under review">Under review</option>
+                        <option value="In testing">In testing</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Dependency</label>
+                    <select name="dependency-0">
+                        <option value="">No Dependency</option>
+                        {% for vendor in vendors %}
+                            <option value="{{ vendor.username }}">{{ vendor.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="button" class="add-task" onclick="addTaskRow()">+</button>
+            </div>
+        </div>
+        <div class="button-container">
+            <button type="submit" class="button">Submit today's jobs</button>
+            <a href="{% url 'stuck_tasks' %}" class="button">Check Dependencies</a>
+        </div>
+        <div id="progressBar" style="display: none;">
+            <progress max="100" value="0"></progress>
+        </div>
+    </form>
+    <!--
+    <script>
+        function addTaskRow() {
+            const taskRowsDiv = document.getElementById('taskRows');
+            const newTaskRow = document.createElement('div');
+            newTaskRow.className = 'task-row';
+            
+            // Get the time value from the first task row
+            const firstTimeInput = document.querySelector('.task-row input[name="time-0"]');
+            const timeValue = firstTimeInput.value;
+            
+            // Generate unique name attributes for the new task row
+            const rowIndex = taskRowsDiv.children.length;
+            
+            newTaskRow.innerHTML = `
+                <input type="date" name="date-${rowIndex}" min="" max="" required>
+                <input type="time" name="time-${rowIndex}" value="${timeValue}" readonly>
+                <input type="text" name="task-${rowIndex}" placeholder="Task done" required>
+                <select name="hours-${rowIndex}" class="hours-select">
+                    {% for i in hours_list %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+                <select name="communicative-changes-${rowIndex}">
+                    <option value="None">None</option>
+                    <option value="Endpoint name change">Endpoint name change</option>
+                    <option value="Request param change">Request param change</option>
+                    <option value="Logic change in API">Logic change in API</option>
+                    <option value="Response change from backend">Response change from backend</option>
+                    <option value="Payload change by frontend">Payload change by frontend</option>
+                    <option value="Table data change">Table data change</option>
+                    <option value="Table structure change">Table structure change</option>
+                    <option value="Format change in work">Format change in work</option>
+                    <option value="Operational change">Operational change</option>
+                    <option value="Look UI change">Look UI change</option>
+                    <option value="Other changes needing comms">Other changes needing comms</option>
+                </select>
+                <select name="status-${rowIndex}">
+                    <option value="Finished">Finished</option>
+                    <option value="In progress">In progress</option>
+                    <option value="Stuck because of dependency">Stuck because of dependency</option>
+                    <option value="Under review">Under review</option>
+                    <option value="In testing">In testing</option>
+                </select>
+                <select name="dependency-${rowIndex}">
+                    <option value="">No Dependency</option>
+                    {% for vendor in vendors %}
+                        <option value="{{ vendor.username }}">{{ vendor.username }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="add-task" onclick="addTaskRow()">+</button>
+            `;
+            taskRowsDiv.appendChild(newTaskRow);
+            setDateRange(newTaskRow.querySelector(`input[name="date-${rowIndex}"]`));
+        }
+    
+        function setDateRange(dateInput) {
+            const today = new Date();
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            const todayFormatted = today.toISOString().split('T')[0];
+            const sevenDaysAgoFormatted = sevenDaysAgo.toISOString().split('T')[0];
+            dateInput.setAttribute('min', sevenDaysAgoFormatted);
+            dateInput.setAttribute('max', todayFormatted);
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstTimeInput = document.querySelector('.task-row input[name="time-0"]');
+            const currentTime = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+            firstTimeInput.value = currentTime;
+    
+            const firstDateInput = document.querySelector('.task-row input[name="date-0"]');
+            setDateRange(firstDateInput);
+    
+            const form = document.getElementById('taskForm');
+            const submitButton = document.getElementById('submitButton');
+            const progressBar = document.getElementById('progressBar');
+    
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+    
+                submitButton.disabled = true;
+                progressBar.style.display = 'block';
+    
+                const formData = new FormData(form);
+    
+                fetch('{% url 'submit_task' %}', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '{% url 'task_success' %}';
+                    } else {
+                        throw new Error('Error occurred during form submission.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred during form submission. Please try again.');
+                    submitButton.disabled = false;
+                    progressBar.style.display = 'none';
+                });
+            });
+        });
+    </script>
+    -->
+    <script>
+        function addTaskRow() {
+            const taskRowsDiv = document.getElementById('taskRows');
+            const newTaskRow = document.createElement('div');
+            newTaskRow.className = 'task-row';
+            
+            // Get the time value from the first task row
+            const firstTimeInput = document.querySelector('.task-row input[name="time-0"]');
+            const timeValue = firstTimeInput.value;
+            
+            // Generate unique name attributes for the new task row
+            const rowIndex = taskRowsDiv.children.length;
+            
+            newTaskRow.innerHTML = `
+                <input type="date" name="date-${rowIndex}" min="" max="" required>
+                <input type="time" name="time-${rowIndex}" value="${timeValue}" readonly>
+                <input type="text" name="task-${rowIndex}" placeholder="Task done" required>
+                <select name="hours-${rowIndex}" class="hours-select">
+                    {% for i in hours_list %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+                <select name="communicative-changes-${rowIndex}">
+                    <option value="">None</option>
+                    <option value="Endpoint name change">Endpoint name change</option>
+                    <option value="Request param change">Request param change</option>
+                    <option value="Logic change in API">Logic change in API</option>
+                    <option value="Response change from backend">Response change from backend</option>
+                    <option value="Payload change by frontend">Payload change by frontend</option>
+                    <option value="Table data change">Table data change</option>
+                    <option value="Table structure change">Table structure change</option>
+                    <option value="Format change in work">Format change in work</option>
+                    <option value="Operational change">Operational change</option>
+                    <option value="Look UI change">Look UI change</option>
+                    <option value="Other changes needing comms">Other changes needing comms</option>
+                </select>
+                <select name="status-${rowIndex}">
+                    <option value="Finished">Finished</option>
+                    <option value="In progress">In progress</option>
+                    <option value="Stuck because of dependency">Stuck because of dependency</option>
+                    <option value="Under review">Under review</option>
+                    <option value="In testing">In testing</option>
+                </select>
+                <select name="dependency-${rowIndex}">
+                    <option value="">No Dependency</option>
+                    {% for vendor in vendors %}
+                        <option value="{{ vendor.username }}">{{ vendor.username }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="add-task" onclick="addTaskRow()">+</button>
+            `;
+            taskRowsDiv.appendChild(newTaskRow);
+            setDateRange(newTaskRow.querySelector(`input[name="date-${rowIndex}"]`));
+        }
+
+        function setDateRange(dateInput) {
+            const today = new Date();
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            const todayFormatted = today.toISOString().split('T')[0];
+            const sevenDaysAgoFormatted = sevenDaysAgo.toISOString().split('T')[0];
+            dateInput.setAttribute('min', sevenDaysAgoFormatted);
+            dateInput.setAttribute('max', todayFormatted);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstTimeInput = document.querySelector('.task-row input[name="time-0"]');
+            const currentTime = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+            firstTimeInput.value = currentTime;
+    
+            const firstDateInput = document.querySelector('.task-row input[name="date-0"]');
+            setDateRange(firstDateInput);
+        });
+    </script>
+</body>
+</html>

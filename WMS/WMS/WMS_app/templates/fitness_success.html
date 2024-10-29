@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Submitted Successfully</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7e7ea;
+            text-align: center;
+            color: #333;
+        }
+        header {
+            margin-top: 20px;
+        }
+        h1 {
+            color: #ff69b4;
+            margin-top: 20px;
+        }
+        .success-message {
+            margin-top: 50px;
+            font-size: 24px;
+        }
+        .back-button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% load static %}
+        <img src="{% static 'laiqa_logo.jpeg' %}" alt="Laiqa Logo">
+    </header>
+    <h1>Plan Submitted Successfully</h1>
+    <p class="success-message">Your plan has been submitted successfully!</p>
+    <a href="{% url 'coach_login' %}">
+        <button class="back-button">Go Back to Login</button>
+    </a>
+</body>
+</html>

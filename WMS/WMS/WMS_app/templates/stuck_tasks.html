@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stuck Tasks</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #ff69b4;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-left: 10px;
+        }
+        .resolve-button {
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stuck Tasks</h1>
+    <p>User: {{ username }}</p>
+
+    {% if stuck_tasks %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Task</th>
+                    <th>Task being done by</th>
+                    <th>Dependency on</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in stuck_tasks %}
+                    <tr>
+                        <td>{{ task.date }}</td>
+                        <td>{{ task.task }}</td>
+                        <td>{{ task.username }}</td>
+                        <td>{{ task.dependency }}</td>
+                        <td>
+                            {% if task.status == 'Stuck because of dependency' %}
+                                <form method="post" action="{% url 'resolve_dependency' task.id %}" onsubmit="return confirmResolution()">
+                                    {% csrf_token %}
+                                    <button type="submit" class="resolve-button">Resolve Dependency</button>
+                                </form>
+                            {% elif task.status == 'Dependency Resolved' %}
+                                <button class="resolved-button" disabled>Resolved</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No stuck tasks found.</p>
+    {% endif %}
+    
+    <button><a href="{% url 'work_management' %}" class="button">Back to Work Management</a></button>
+
+    <script>
+        function confirmResolution() {
+            return confirm("Are you sure this dependency has been resolved? It will be marked as status changed by you.");
+        }
+    </script>
+
+</body>
+</html>

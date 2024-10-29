@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Women's Day</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7e7ea;
+            text-align: center;
+            color: #333;
+        }
+        header {
+            margin-top: 20px;
+        }
+        h1 {
+            color: #ff69b4;
+            margin-top: 20px;
+        }
+        .tagline {
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+        form {
+            margin-top: 30px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #responseMessage {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            display: none;
+        }
+        footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% load static %}
+        <img src="{% static '/home/bitnami/lwai/lw_fitness/laiqa_fitness/staticfiles/laiqa_logo.jpeg' %}" alt="Laiqa Logo">    </header>
+    <h1>Wishing you Happy Women's Day!</h1>
+    <p class="tagline">Celebrating the incredible women of Laiqa!</p>
+    <form id="messageForm">
+        {% csrf_token %}
+        <label for="name">Enter your name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+        <button type="submit">Click to see your message</button>
+    </form>
+    <div id="responseMessage"></div>
+    <footer>
+        <p>Only for Laiqa Employees - Internal Usage</p>
+    </footer>
+    <script>
+        const form = document.getElementById('messageForm');
+        const responseMessageDiv = document.getElementById('responseMessage');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const payload = {
+                name: name
+            };
+            fetch('http://65.0.29.195:8080/fitness_opz/get_your_msg/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    responseMessageDiv.innerHTML = `<p>Error: ${data.error}</p>`;
+                    responseMessageDiv.style.color = '#ffffff';
+                    responseMessageDiv.style.backgroundColor = '#ff0000';
+                    responseMessageDiv.style.fontWeight = 'bold';
+                } else {
+                    responseMessageDiv.innerHTML = `<p>${data.message}</p>`;
+                    responseMessageDiv.style.color = '#ffffff';
+                    responseMessageDiv.style.backgroundColor = '#9C0FC2';
+                    responseMessageDiv.style.fontWeight = 'bold';
+                }
+                responseMessageDiv.style.display = 'block';
+            })
+            .catch(error => {
+                responseMessageDiv.innerHTML = `<p>Error: ${error}</p>`;
+                responseMessageDiv.style.color = '#ffffff';
+                responseMessageDiv.style.backgroundColor = '#ff0000';
+                responseMessageDiv.style.fontWeight = 'bold';
+                responseMessageDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

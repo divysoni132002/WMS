@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Meal Plans</title>
+</head>
+<body>
+    <h1>Store Meal Plans</h1>
+    <h3>Add user ID and then names of meal plans you have made in CDP.</h3>
+    <h3>Note: Add exact spellings and also keep them comma comma-separated.</h3>
+    <form id="mealPlanForm">
+        {% csrf_token %}
+        <label for="userId">User ID:</label>
+        <input type="text" id="userId" name="user_id" required><br><br>
+        <label for="mealPlans">Meal Plans (comma-separated):</label><br>
+        <textarea id="mealPlans" name="meal_plans" rows="4" cols="50" required></textarea><br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById("mealPlanForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            var formData = new FormData(this);
+
+            fetch("/store_meal_plans/", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    </script>
+</body>
+</html>

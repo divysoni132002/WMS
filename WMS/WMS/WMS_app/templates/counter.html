@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laiqa Wellness Launch Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #c23ab4;
+            text-align: center;
+            color: rgb(150, 203, 28);
+        }
+        .container {
+            margin-top: 20px;
+        }
+        h1, h2 {
+            color: #c9cc1d;
+        }
+        .footerp {
+            text-align: left;
+            color: #c9cc1d;
+        }
+        h3 {
+            text-align: left;
+            color: #c9cc1d;
+        }
+        .timer {
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #1335e0;
+            border-radius: 5px;
+            display: inline-block;
+            text-decoration-color: greenyellow;
+        }
+        .timer p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .status {
+            display: none;
+            font-weight: bold;
+        }
+        .status[data-status="Completed in Time"] {
+            color: green;
+        }
+        .status[data-status="Delayed bcz of Change in Plan"],
+        .status[data-status="Delayed"] {
+            color: red;
+        }
+        footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: rgb(15, 222, 12);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Laiqa Wellness Launch Timer -- Version 1.0</h1>
+        
+        <div id="APIs" class="timer">
+            <h2>APIs</h2>
+            <p id="APIs_timer"></p>
+            <p class="status" data-status="pending">Status update pending</p>
+        </div>
+        
+        <div id="iOS" class="timer">
+            <h2>iOS</h2>
+            <p id="iOS_timer"></p>
+            <p class="status" data-status="pending">Status update pending</p>
+        </div>
+
+        <div id="CDP" class="timer">
+            <h2>CDP</h2>
+            <p id="CDP_timer"></p>
+            <p class="status" data-status="pending">Status update pending</p>
+        </div>
+
+        <div id="DD" class="timer">
+            <h2>Doctor's Dashboard</h2>
+            <p id="DD_timer"></p>
+            <p class="status" data-status="Completed in Time">Completed in Time</p>
+        </div>
+
+        <div id="Android" class="timer">
+            <h2>Android</h2>
+            <p id="Android_timer"></p>
+            <p class="status" data-status="pending">Status update pending</p>
+        </div>
+
+        <div id="NFM" class="timer">
+            <h2>New Fitness Module</h2>
+            <p id="NFM_timer"></p>
+            <p class="status" data-status="pending">Status update pending</p>
+        </div>
+
+        <div id="Website" class="timer">
+            <h2>Website</h2>
+            <p id="Website_timer"></p>
+            <p class="status" data-status="pending">Status update pending</p>
+        </div>
+    </div>
+
+    <footer>
+        <h3>All modules are interconnected and interdependent. The completion of one relies on the finishing of others.</h3>
+        <h3> E.g Even a copy change, changes the way app has to process the input, changes the request call format, changes the program that it was to handle a new form of input,</br>
+        then changes the way it has to be stored in a table, also requires thinking on how to score things and sometimes the scoring programs. </br>
+        Every change is interconnected.</h3>
+    </footer>
+
+    <script>
+        // Define launch dates for each module
+        const launchDates = {
+            'APIs': new Date('April 6, 2024 14:00:00'),
+            'iOS': new Date('April 6, 2024 14:00:00'),
+            'CDP': new Date('April 7, 2024 14:00:00'),
+            'DD': new Date('April 5, 2024 14:00:00'),
+            'Android': new Date('April 10, 2024 14:00:00'),
+            'NFM': new Date('April 6, 2024 19:00:00'),
+            'Website': new Date('April 6, 2024 14:00:00')
+        };
+
+        // Update timer every second
+        setInterval(() => {
+            for (const module in launchDates) {
+                const now = new Date().getTime();
+                const distance = launchDates[module] - now;
+
+                // Calculate time left
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Display the result
+                document.getElementById(`${module}_timer`).innerHTML = days + "d " + hours + "h "
+                + minutes + "m " + seconds + "s ";
+
+                // If the count down is over, show status text
+                if (distance < 0) {
+                    document.getElementById(`${module}_timer`).innerHTML = "EXPIRED";
+                    const statusElement = document.querySelector(`#${module} .status`);
+                    statusElement.style.display = 'block';
+                    const status = statusElement.getAttribute('data-status');
+                    statusElement.innerHTML = status;
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
